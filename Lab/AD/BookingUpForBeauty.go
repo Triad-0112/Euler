@@ -1,35 +1,29 @@
-package logs
+// Package census simulates a system used to collect census data.
+package census
 
-// Application identifies the application emitting the given log.
-func Application(log string) string {
-	app := map[rune]string{
-		'\u2757':     "recommendation",
-		'\U0001f50d': "search",
-		'\u2600':     "weather",
-	}
-	for _, char := range log {
-		if name, ok := app[char]; ok {
-			return name
-		}
-	}
-	return "default"
+// Resident represents a resident in this city.
+type Resident struct {
+	Name    string
+	Age     int
+	Address map[string]string
 }
 
-// Replace replaces all occurrences of old with new, returning the modified log
-// to the caller.
-func Replace(log string, oldRune, newRune rune) string {
-	runes := []rune(log)
-	for index, char := range runes {
-		if char == oldRune {
-			runes[index] = newRune
-		}
-	}
-	return string(runes)
+// NewResident registers a new resident in this city.
+func NewResident(name string, age int, address map[string]string) *Resident {
+	panic("Please implement NewResident.")
 }
 
-// WithinLimit determines whether or not the number of characters in log is
-// within the limit.
-func WithinLimit(log string, limit int) bool {
-	runes := []rune(log)
-	return len(runes) <= limit
+// HasRequiredInfo determines if a given resident has all of the required information.
+func (r *Resident) HasRequiredInfo() bool {
+	panic("Please implement HasRequiredInfo.")
+}
+
+// Delete deletes a resident's information.
+func (r *Resident) Delete() {
+	panic("Please implement Delete.")
+}
+
+// Count counts all residents that have provided the required information.
+func Count(residents []*Resident) int {
+	panic("Please implement Count.")
 }
