@@ -1,32 +1,36 @@
-package birdwatcher
+package lasagna
 
-// TotalBirdCount return the total bird count by summing
-// the individual day's counts.
-func TotalBirdCount(birdsPerDay []int) int {
-	sum := 0
-	for i := 0; i < len(birdsPerDay); i++ {
-		sum = sum + birdsPerDay[i]
+// TODO: define the 'PreparationTime()' function
+func PreparationTime(layers []string, time int) int {
+	if time == 0 {
+		time = 2
 	}
-	return sum
+	return len(layers) * time
 }
 
-// BirdsInWeek returns the total bird count by summing
-// only the items belonging to the given week.
-func BirdsInWeek(birdsPerDay []int, week int) int {
-	sum := 0
-	for day := 0; day < 7; day++ {
-		sum += birdsPerDay[day+(week-1)*7]
-	}
-	return sum
-}
-
-// FixBirdCountLog returns the bird counts after correcting
-// the bird counts for alternate days.
-func FixBirdCountLog(birdsPerDay []int) []int {
-	for i := range birdsPerDay {
-		if i%2 == 0 {
-			birdsPerDay[i]++
+// TODO: define the 'Quantities()' function
+func Quantities(layers []string) (noodles int, sauce float64) {
+	for _, v := range layers {
+		if v == "noodles" {
+			noodles += 50
+		}
+		if v == "sauce" {
+			sauce += 0.2
 		}
 	}
-	return birdsPerDay
+	return noodles, sauce
+}
+
+// TODO: define the 'AddSecretIngredient()' function
+func AddSecretIngredient(a, b []string) []string {
+	return append(b, a[len(a)-1])
+}
+
+// TODO: define the 'ScaleRecipe()' function
+func ScaleRecipe(a []float64, b int) []float64 {
+	trash := make([]float64, len(a))
+	for i, v := range a {
+		trash[i] = v * float64(b) / 2
+	}
+	return trash
 }
