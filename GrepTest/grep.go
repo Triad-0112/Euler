@@ -46,7 +46,8 @@ func main() {
 		}
 		//details mime of files
 		filext := http.DetectContentType(data)
-		short := strings.Split(string(data), "\n")
+		insensitive := strings.ToLower(string(data))
+		short := strings.Split(string(insensitive), "\n")
 		filecol := color.New(color.FgRed, color.Bold)
 		linucol := color.New(color.FgYellow, color.Bold)
 		linecol := color.New(color.FgWhite, color.Bold)
