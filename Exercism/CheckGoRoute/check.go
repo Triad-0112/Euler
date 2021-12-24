@@ -1,4 +1,4 @@
-package letter
+package main
 
 import "sync"
 
@@ -38,4 +38,9 @@ func ConcurrentFrequency(texts []string) FreqMap {
 		}
 	}
 	return res
+}
+func main() {
+	var array []string
+	array[0] = "master"
+	ConcurrentFrequency(array)
 }
