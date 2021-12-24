@@ -1,18 +1,22 @@
-package luhn
+package main
 
 import (
+	"fmt"
 	"strconv"
 	"strings"
 )
 
-func Valid(id string) bool {
-	a := strings.Join(strings.Fields(id), "")
+func main() {
+	string := ("7160 6873 781")
+	a := strings.Join(strings.Fields(string), "")
 	b := strings.Split(a, "")
+	var c bool
 	array := make([]int, len(b))
 	total := 0
 	for i := range array {
 		array[i], _ = strconv.Atoi(b[i])
 	}
+	fmt.Println(array)
 	for i := len(array) - 1; i >= 0; i-- {
 		if len(array)%2 == 0 {
 			if i%2 == 0 || i == 0 {
@@ -32,8 +36,11 @@ func Valid(id string) bool {
 		total += array[i]
 	}
 	if total%10 != 0 {
-		return false
+		c = false
 	} else {
-		return true
+		c = true
 	}
+	fmt.Println(array)
+	fmt.Println(total)
+	fmt.Println(c)
 }
