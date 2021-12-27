@@ -2,14 +2,25 @@ package main
 
 import "fmt"
 
-func main() {
-	a0 := new(int)
-	fmt.Println(a0)
-	*a0 = 10
-	fmt.Println(*a0)
-	x := *a0
-	fmt.Println(x)
-	b1, b2 := &x, &x
-	fmt.Println(b1, b2)
+type Book struct {
+	pages int
+}
 
+type Books []Book
+
+func (books Books) Modify() {
+	// Modifications on the underlying part of
+	// the receiver will be reflected to outside
+	// of the method.
+	books[0].pages = 500
+	// Modifications on the direct part of the
+	// receiver will not be reflected to outside
+	// of the method.
+	books = append(books, Book{789})
+}
+
+func main() {
+	var books = Books{{123}, {456}}
+	books.Modify()
+	fmt.Println(books) // [{500} {456}]
 }
