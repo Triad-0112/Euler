@@ -11,6 +11,11 @@ type Queue interface {
 // Push values
 func (q *Data) Push(n interface{}) *Data {
 	if q.Len() < q.size {
+		for i := range q.data {
+			if q.data[i] == n {
+				return q
+			}
+		}
 		q.data = append(q.data, n)
 	} else {
 		q.Pop()
@@ -33,7 +38,7 @@ func (q *Data) Pop() interface{} {
 //Check the queue logic condition if it was fullfilled or no by checking the existence of item
 func (q *Data) Contains(key interface{}) bool {
 	cond := false
-	for i := 0; i < q.Len(); i++ {
+	for i := range q.data {
 		if q.data[i] == key {
 			cond = true
 		}

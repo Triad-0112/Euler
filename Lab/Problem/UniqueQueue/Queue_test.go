@@ -8,12 +8,18 @@ var testValues = []interface{}{
 	"lorem",
 	"ipsum",
 	1,
-	1,
-	1,
+	2,
+	3,
 	"jack",
-	"jill",
-	"felix",
+	"jack",
+	"jack",
 	"donking",
+	"rajamaha",
+	"7",
+	3,
+	5,
+	"Maharaja",
+	"What!!!",
 }
 
 // TestPush validate evict old item policy
