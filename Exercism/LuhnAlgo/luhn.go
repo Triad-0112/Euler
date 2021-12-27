@@ -13,27 +13,31 @@ func Valid(id string) bool {
 	for i := range array {
 		array[i], _ = strconv.Atoi(b[i])
 	}
-	for i := len(array) - 1; i >= 0; i-- {
-		if len(array)%2 == 0 {
-			if i%2 == 0 || i == 0 {
-				array[i] *= 2
-				if array[i] > 9 {
-					array[i] = array[i] - 9
+	if len(array) >= 2 {
+		for i := len(array) - 1; i >= 0; i-- {
+			if len(array)%2 == 0 {
+				if i%2 == 0 || i == 0 {
+					array[i] *= 2
+					if array[i] > 9 {
+						array[i] = array[i] - 9
+					}
+				}
+			} else {
+				if i == len(array)-2 || (i-1)%2 == 0 {
+					array[i] *= 2
+					if array[i] > 9 {
+						array[i] = array[i] - 9
+					}
 				}
 			}
-		} else {
-			if i == len(array)-2 || (i-1)%2 == 0 {
-				array[i] *= 2
-				if array[i] > 9 {
-					array[i] = array[i] - 9
-				}
-			}
+			total += array[i]
 		}
-		total += array[i]
-	}
-	if total%10 != 0 {
-		return false
+		if total%10 != 0 {
+			return false
+		} else {
+			return true
+		}
 	} else {
-		return true
+		return false
 	}
 }
