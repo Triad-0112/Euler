@@ -4,12 +4,15 @@ import (
 	"fmt"
 )
 
+type Dmg interface {
+}
+
 //type damager interface {
 //EnemyDamage()
 //OwnDamage()
 //}
 type OwnStatus interface {
-	MyStatus()
+	MyStatus(Name string)
 }
 type Base struct {
 	Name           string
