@@ -1,78 +1,73 @@
-package main
+package grep
 
 import (
 	"bufio"
 	"fmt"
 	"os"
 	"regexp"
-	"strings"
 )
 
-// Search searches files for lines matching a regular expression pattern.
-func Search(pattern string, flags, files []string) []string {
-	var lineNums, namesOnly, ignoreCase, invert, entireLines bool
-	for _, flag := range flags {
-		switch flag {
-		case "-n":
-			lineNums = true
-		case "-l":
-			namesOnly = true
-		case "-i":
-			ignoreCase = true
-		case "-v":
-			invert = true
-		case "-x":
-			entireLines = true
-		}
-	}
-	if ignoreCase {
-		pattern = strings.ToLower(pattern)
-	}
-	if entireLines {
-		pattern = "^" + pattern + "$"
-	}
-	rx := regexp.MustCompile(pattern)
-	matches := []string{}
-	for _, fname := range files {
-		file, _ := os.Open(fname)
-		scanner := bufio.NewScanner(file)
-		linenum := 1
-		for scanner.Scan() {
-			line := scanner.Text()
-			var match bool
-			if ignoreCase {
-				match = rx.MatchString(strings.ToLower(line))
-			} else {
-				match = rx.MatchString(line)
-			}
-			if invert {
-				match = !match
-			}
-			if match {
-				var output string
-				if namesOnly {
-					matches = append(matches, fname)
-					break
-				}
-				if len(files) > 1 {
-					output = fname + ":"
-				}
-				if lineNums {
-					output += fmt.Sprintf("%d:", linenum)
-				}
-				output += line
-				matches = append(matches, output)
-			}
-			linenum++
-		}
-		file.Close()
-	}
-	return matches
-}
-func main() {
-	a := "write"
-	files := []string{"teststory.txt"}
-	flags := []string{"-l"}
-	Search(a, flags, files)
+type f map[rune]bool
 
+func OneFileSearch(flag f, filename string, multifile bool, r *regexp.Regexp) []string {
+	results := []string{}
+	file, err := os.Open(filename)
+	if err != nil {
+		panic("failed to open")
+	}
+	defer file.Close()
+	scanner := bufio.NewScanner(file)
+	scanner.Split(bufio.ScanLines)
+	linum := 0
+	for scanner.Scan() {
+		linum++
+		line := scanner.Text()
+		find := r.MatchString(line)
+		if (find && !(flag['v'])) || (!(find) && flag['v']) {
+			if flag['l'] {
+				fmt.Println(filename)
+				return []string{filename}
+			}
+			if flag['n'] {
+				line = fmt.Sprintf("%d:%s", linum, line)
+			}
+			if multifile {
+				line = fmt.Sprintf("%s:%s", filename, line)
+			}
+			results = append(results, line)
+		}
+	}
+	return results
+}
+func Search(pattern string, flags, files []string) []string {
+	results := []string{}
+	// scan flags
+	flag := f{
+		'i': false,
+		'n': false,
+		'l': false,
+		'v': false,
+		'x': false,
+	}
+	for _, f := range flags {
+		switch f {
+		case "-i":
+			flag['i'] = true
+			pattern = "(?i)" + pattern
+		case "-n":
+			flag['n'] = true
+		case "-l":
+			flag['l'] = true
+		case "-v":
+			flag['v'] = true
+		case "-x":
+			flag['x'] = true
+			pattern = "^" + pattern + "$"
+		}
+	}
+	for _, filename := range files {
+		resonefile := OneFileSearch(flag, filename, len(files) > 1, regexp.MustCompile(pattern))
+		results = append(results, resonefile...)
+	}
+	return results
 }

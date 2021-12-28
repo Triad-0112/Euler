@@ -7,9 +7,9 @@ import (
 var testValues = []interface{}{
 	"lorem",
 	"ipsum",
-	1,
 	2,
-	3,
+	2,
+	2,
 	"jack",
 	"jack",
 	"jack",
