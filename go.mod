@@ -5,21 +5,21 @@ go 1.17
 require github.com/fatih/color v1.13.0
 
 require (
-	github.com/golang/protobuf v1.4.3 // indirect
-	go.uber.org/atomic v1.7.0 // indirect
-	go.uber.org/multierr v1.6.0 // indirect
+	github.com/golang/protobuf v1.5.2 // indirect
+	go.uber.org/atomic v1.9.0 // indirect
+	go.uber.org/multierr v1.7.0 // indirect
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c // indirect
-	golang.org/x/text v0.3.6 // indirect
-	google.golang.org/genproto v0.0.0-20200526211855-cb27e3aa2013 // indirect
-	google.golang.org/protobuf v1.25.0 // indirect
+	golang.org/x/text v0.3.7 // indirect
+	google.golang.org/genproto v0.0.0-20211223182754-3ac035c7e7cb // indirect
+	google.golang.org/protobuf v1.27.1 // indirect
 )
 
 require (
-	github.com/Triad-0112/GoCode v0.0.0-20211222061358-7e71f8d2ba19
+	github.com/Triad-0112/GoCode v0.0.0-20211222081202-365e940544a9
 	github.com/mattn/go-colorable v0.1.12 // indirect
 	github.com/mattn/go-isatty v0.0.14 // indirect
 	github.com/mssola/user_agent v0.5.3
-	github.com/notnil/chess v1.7.0
+	github.com/notnil/chess v1.7.1
 	github.com/saracen/walker v0.1.2
 	github.com/segmentio/go-log v1.9.0
 	github.com/tj/docopt v1.0.0
