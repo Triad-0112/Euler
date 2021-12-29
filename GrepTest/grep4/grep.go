@@ -39,6 +39,7 @@ func OneFileSearch(flag f, filename string, multifile bool, r *regexp.Regexp) []
 	}
 	return results
 }
+
 func Search(pattern string, flags, files []string) []string {
 	results := []string{}
 	// scan flags
