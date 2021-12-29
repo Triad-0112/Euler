@@ -2,13 +2,25 @@ package main
 
 import (
 	"fmt"
-
-	Damage "github.com/Triad-0112/GoCode/TestPackage/Idonk"
+	"time"
 )
 
 func main() {
-	a := 1000
-	b := 50000
-	Damage.Attack(a, b)
-	fmt.Println(b)
+
+	messages := make(chan string, 3)
+
+	messages <- "one"
+	messages <- "two"
+	messages <- "three"
+
+	go func(m *chan string) {
+		fmt.Println("Entering the goroutine...")
+		for {
+			fmt.Println(<-*m)
+		}
+	}(&messages)
+	time.Sleep(5 * time.Second)
+	fmt.Println("Done!")
 }
+
+// https://go.dev/tour/concurrency/5
