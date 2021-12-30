@@ -1,7 +1,1 @@
-package Dispatcher
-
-type Dispatcher interface {
-	LaunchWorker(w WorkerLauncher)
-	MakeRequest(Request)
-	Stop()
-}
+package dispatcher
