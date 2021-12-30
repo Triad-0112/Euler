@@ -1,0 +1,3 @@
+# Euler
+There is nothing special here, only full of go language.
+Currently on work to test how go routines work...
