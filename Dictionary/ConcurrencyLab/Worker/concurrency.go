@@ -9,8 +9,8 @@ import (
 	"os"
 	"strconv"
 	"time"
-	"workerpool"
-	""
+
+	"github.com/Triad-0112/Euler/Dictionary/ConcurrencyLab/Worker/workerpool"
 )
 
 type Graduate struct {
