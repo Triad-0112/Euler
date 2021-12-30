@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/csv"
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -46,8 +47,6 @@ func main() {
 	}
 	req.Header.Set("User-Agent", "spacecount-tutorial")
 
-	// Start Worker Pool.
-	//worker()
 	res, getErr := spaceClient.Do(req)
 	if getErr != nil {
 		log.Fatal(getErr)
@@ -67,33 +66,28 @@ func main() {
 	if jsonErr != nil {
 		log.Fatal(jsonErr)
 	}
-
-	records := [][]string{}
-	for y := 1993; y <= 2014; y++ {
-		convert := strconv.Itoa(y)
-		for i := 0; i < len(people1.Result.Records); i++ {
-			if people1.Result.Records[i].Year == convert {
-				temp := []string{
-					strconv.Itoa(people1.Result.Records[i].Ide),
-					people1.Result.Records[i].Sex,
-					people1.Result.Records[i].No,
-					people1.Result.Records[i].Course,
-					people1.Result.Records[i].Year,
+	go func() {
+		records := [][]string{}
+		for y := 1993; y <= 2014; y++ {
+			convert := strconv.Itoa(y)
+			for i := 0; i < len(people1.Result.Records); i++ {
+				if people1.Result.Records[i].Year == convert {
+					temp := []string{
+						strconv.Itoa(people1.Result.Records[i].Ide),
+						people1.Result.Records[i].Sex,
+						people1.Result.Records[i].No,
+						people1.Result.Records[i].Course,
+						people1.Result.Records[i].Year,
+					}
+					records = append(records, temp)
 				}
-				records = append(records, temp)
 			}
+			filename := convert + ".csv"
+			CreateFile(filename, records)
+			records = records[:0]
 		}
-		filename := convert + ".csv"
-		CreateFile(filename, records)
-		records = records[:0]
-	}
-	//fmt.Println("User Name: " + people1.Result.Records[i].Year)
-	// records[i][0] = strconv.Itoa(people1.Result.Records[i].Ide)
-	// records[i][1] = people1.Result.Records[i].Sex
-	// records[i][2] = people1.Result.Records[i].No
-	// records[i][3] = people1.Result.Records[i].Course
-	// records[i][4] = people1.Result.Records[i].Year
-
+	}()
+	fmt.Scanln()
 }
 func CreateFile(filename string, records [][]string) {
 	f, err := os.Create(filename)
