@@ -5,6 +5,7 @@ import (
 	"strings"
 )
 
+// warning: this example can cause some race condition
 func main() {
 	data := []string{"Ace destroy everything around his area",
 		"King oredering 5 of powerhouse to keep place very safety and warm",
