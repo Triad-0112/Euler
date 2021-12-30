@@ -1,7 +1,6 @@
 package main
 
 import (
-	"/workerpool"
 	"encoding/csv"
 	"encoding/json"
 	"io/ioutil"
@@ -10,6 +9,8 @@ import (
 	"os"
 	"strconv"
 	"time"
+	"workerpool"
+	""
 )
 
 type Graduate struct {
