@@ -3,14 +3,13 @@ package main
 import (
 	"encoding/csv"
 	"encoding/json"
+	"gopls-workspace/Dictionary/ConcurrencyLab/Worker/workerpool"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
 	"strconv"
 	"time"
-
-	"github.com/Triad-0112/Euler/Dictionary/ConcurrencyLab/Worker/workerpool"
 )
 
 type Graduate struct {
@@ -37,6 +36,11 @@ type Records struct {
 	Year   string `json:"year"`
 }
 
+type result struct {
+	id    int
+	value int
+}
+
 func main() {
 
 	url := "https://data.gov.sg/api/action/datastore_search?resource_id=eb8b932c-503c-41e7-b513-114cffbe2338"
@@ -56,11 +60,6 @@ func main() {
 	totalWorker := 5
 	wp := workerpool.NewWorkerPool(totalWorker)
 	wp.Run()
-
-	type result struct {
-		id    int
-		value int
-	}
 
 	totalTask := 2
 	resultC := make(chan result, totalTask)
@@ -119,7 +118,6 @@ func main() {
 	}
 
 	f, err := os.Create("users.csv")
-	defer f.Close()
 
 	if err != nil {
 
