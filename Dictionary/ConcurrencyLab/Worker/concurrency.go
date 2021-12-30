@@ -3,7 +3,6 @@ package main
 import (
 	"encoding/csv"
 	"encoding/json"
-	"gopls-workspace/Dictionary/ConcurrencyLab/Worker/workerpool"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -36,48 +35,19 @@ type Records struct {
 	Year   string `json:"year"`
 }
 
-type result struct {
-	id    int
-	value int
-}
-
 func main() {
-
-	url := "https://data.gov.sg/api/action/datastore_search?resource_id=eb8b932c-503c-41e7-b513-114cffbe2338"
-
+	url := "https://data.gov.sg/api/action/datastore_search?resource_id=eb8b932c-503c-41e7-b513-114cffbe2338&limit=660"
 	spaceClient := http.Client{
 		Timeout: time.Second * 2, // Timeout after 2 seconds
 	}
-
 	req, err := http.NewRequest(http.MethodGet, url, nil)
 	if err != nil {
 		log.Fatal(err)
 	}
-
 	req.Header.Set("User-Agent", "spacecount-tutorial")
 
 	// Start Worker Pool.
-	totalWorker := 5
-	wp := workerpool.NewWorkerPool(totalWorker)
-	wp.Run()
-
-	totalTask := 2
-	resultC := make(chan result, totalTask)
-
-	for i := 0; i < totalTask; i++ {
-		id := i + 1
-		wp.AddTask(func() {
-			log.Printf("[main] Starting task %d", id)
-			time.Sleep(1 * time.Second)
-			resultC <- result{id, id * 2}
-		})
-	}
-
-	for i := 0; i < totalTask; i++ {
-		res := <-resultC
-		log.Printf("[main] Task %d has been finished with result %d", res.id, res.value)
-	}
-
+	//worker()
 	res, getErr := spaceClient.Do(req)
 	if getErr != nil {
 		log.Fatal(getErr)
@@ -99,25 +69,34 @@ func main() {
 	}
 
 	records := [][]string{}
-
-	for i := 0; i < len(people1.Result.Records); i++ {
-		//fmt.Println("User Name: " + people1.Result.Records[i].Year)
-		// records[i][0] = strconv.Itoa(people1.Result.Records[i].Ide)
-		// records[i][1] = people1.Result.Records[i].Sex
-		// records[i][2] = people1.Result.Records[i].No
-		// records[i][3] = people1.Result.Records[i].Course
-		// records[i][4] = people1.Result.Records[i].Year
-		temp := []string{
-			strconv.Itoa(people1.Result.Records[i].Ide),
-			people1.Result.Records[i].Sex,
-			people1.Result.Records[i].No,
-			people1.Result.Records[i].Course,
-			people1.Result.Records[i].Year,
+	for y := 1993; y <= 2014; y++ {
+		convert := strconv.Itoa(y)
+		for i := 0; i < len(people1.Result.Records); i++ {
+			if people1.Result.Records[i].Year == convert {
+				temp := []string{
+					strconv.Itoa(people1.Result.Records[i].Ide),
+					people1.Result.Records[i].Sex,
+					people1.Result.Records[i].No,
+					people1.Result.Records[i].Course,
+					people1.Result.Records[i].Year,
+				}
+				records = append(records, temp)
+			}
 		}
-		records = append(records, temp)
+		filename := convert + ".csv"
+		CreateFile(filename, records)
+		records = records[:0]
 	}
+	//fmt.Println("User Name: " + people1.Result.Records[i].Year)
+	// records[i][0] = strconv.Itoa(people1.Result.Records[i].Ide)
+	// records[i][1] = people1.Result.Records[i].Sex
+	// records[i][2] = people1.Result.Records[i].No
+	// records[i][3] = people1.Result.Records[i].Course
+	// records[i][4] = people1.Result.Records[i].Year
 
-	f, err := os.Create("users.csv")
+}
+func CreateFile(filename string, records [][]string) {
+	f, err := os.Create(filename)
 
 	if err != nil {
 
@@ -130,5 +109,4 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-
 }
