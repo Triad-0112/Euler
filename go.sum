@@ -7,6 +7,8 @@ github.com/Triad-0112/GoCode v0.0.0-20211222061358-7e71f8d2ba19/go.mod h1:gMauJt
 github.com/Triad-0112/GoCode v0.0.0-20211222081202-365e940544a9 h1:6X8GkZRVS9QQKi2MZ7Qk/ryIybohiwTIzUC8bA0VZps=
 github.com/Triad-0112/GoCode v0.0.0-20211222081202-365e940544a9/go.mod h1:gMauJtCzIC2LmMz3FNfnUNM2xA8to3g/psFY5bvqVwE=
 github.com/ajstarks/svgo v0.0.0-20200320125537-f189e35d30ca/go.mod h1:K08gAheRH3/J6wwsYMMT4xOr94bZjxIelGM0+d/wbFw=
+github.com/alitto/pond v1.6.1 h1:dYs6GS0ts8fJ0nqSJz7lrc2s5MXW1XcINPl7R2VWzPE=
+github.com/alitto/pond v1.6.1/go.mod h1:/TYBaKCXvQ8Qiy3TfOoKeu6K7AVAhMpvu4itSpGdws0=
 github.com/antihax/optional v1.0.0/go.mod h1:uupD/76wgC+ih3iEmQUL+0Ugr19nfwCT1kdvxnR2qWY=
 github.com/benbjohnson/clock v1.1.0/go.mod h1:J11/hYXuz8f4ySSvYwY0FKfm+ezbsZBKZxNJlLklBHA=
 github.com/census-instrumentation/opencensus-proto v0.2.1/go.mod h1:f6KPmirojxKA12rnyqOA5BBL4O983OfeGPqjHWSTneU=

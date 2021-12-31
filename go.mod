@@ -16,6 +16,7 @@ require (
 
 require (
 	github.com/Triad-0112/GoCode v0.0.0-20211222081202-365e940544a9
+	github.com/alitto/pond v1.6.1
 	github.com/mattn/go-colorable v0.1.12 // indirect
 	github.com/mattn/go-isatty v0.0.14 // indirect
 	github.com/mssola/user_agent v0.5.3

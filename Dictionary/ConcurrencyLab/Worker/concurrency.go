@@ -3,15 +3,23 @@ package main
 import (
 	"encoding/csv"
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
+	"path/filepath"
 	"strconv"
+	"sync"
 	"time"
 )
 
+//TESTING WORKERPOOL
+type Worker struct {
+	ID   string
+	Jobs string
+}
+
+//Data TYPE DONT CHANGE
 type Graduate struct {
 	Success bool   `json:"success"`
 	Result  Result `json:"result"`
@@ -37,6 +45,7 @@ type Records struct {
 }
 
 func main() {
+	var wg sync.WaitGroup
 	url := "https://data.gov.sg/api/action/datastore_search?resource_id=eb8b932c-503c-41e7-b513-114cffbe2338&limit=660"
 	spaceClient := http.Client{
 		Timeout: time.Second * 2, // Timeout after 2 seconds
@@ -45,7 +54,6 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	req.Header.Set("User-Agent", "spacecount-tutorial")
 
 	res, getErr := spaceClient.Do(req)
 	if getErr != nil {
@@ -66,40 +74,46 @@ func main() {
 	if jsonErr != nil {
 		log.Fatal(jsonErr)
 	}
-	go func() {
-		records := [][]string{}
-		for y := 1993; y <= 2014; y++ {
-			convert := strconv.Itoa(y)
-			for i := 0; i < len(people1.Result.Records); i++ {
-				if people1.Result.Records[i].Year == convert {
-					temp := []string{
-						strconv.Itoa(people1.Result.Records[i].Ide),
-						people1.Result.Records[i].Sex,
-						people1.Result.Records[i].No,
-						people1.Result.Records[i].Course,
-						people1.Result.Records[i].Year,
-					}
-					records = append(records, temp)
-				}
-			}
-			filename := convert + ".csv"
-			CreateFile(filename, records)
-			records = records[:0]
-		}
-	}()
-	fmt.Scanln()
-}
-func CreateFile(filename string, records [][]string) {
-	f, err := os.Create(filename)
+	//ch := make(chan [][]string, 22)
+	m := make(map[int][][]string)
+	//records := [][]string{}
+	for y := 1993; y <= 2014; y++ {
+		convert := strconv.Itoa(y)
 
+		for i := range people1.Result.Records {
+			//for i := 0; i < len(people1.Result.Records); i++ {
+			if people1.Result.Records[i].Year == convert {
+				temp := []string{
+					strconv.Itoa(people1.Result.Records[i].Ide),
+					people1.Result.Records[i].Sex,
+					people1.Result.Records[i].No,
+					people1.Result.Records[i].Course,
+					people1.Result.Records[i].Year,
+				}
+				m[y] = append(m[y], temp)
+			}
+		}
+		filename := convert + ".csv"
+		dir := "D:/Test/"
+		wg.Add(1)
+		go CreateFile(dir, filename, m[y], wg)
+	}
+	wg.Wait()
+}
+func CreateFile(dir, filename string, a [][]string, wg sync.WaitGroup) {
+	defer wg.Done()
+	filepath, err := filepath.Abs(dir + filename)
+	if err != nil {
+		log.Fatalln("Invalid path")
+	}
+	f, err := os.Create(filepath)
 	if err != nil {
 
 		log.Fatalln("failed to open file", err)
 	}
-
+	//value := <-records
 	w := csv.NewWriter(f)
-	err = w.WriteAll(records) // calls Flush internally
-
+	err = w.WriteAll(a) // calls Flush internally
 	if err != nil {
 		log.Fatal(err)
 	}
