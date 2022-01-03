@@ -11,6 +11,7 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
+	"sync"
 	"time"
 )
 
@@ -55,7 +56,7 @@ func main() {
 	dir := flag.String("output", "", "Destination Output file")
 	flag.Parse()
 	flag.Lookup("grab")
-	//var wg sync.WaitGroup
+	var wg sync.WaitGroup
 	url := "https://data.gov.sg/api/action/datastore_search?resource_id=eb8b932c-503c-41e7-b513-114cffbe2338&limit=660"
 	spaceClient := http.Client{
 		Timeout: time.Second * 2, // Timeout after 2 seconds
@@ -110,21 +111,24 @@ func main() {
 	jobs := make(chan [][]string, numJobs)
 	results := make(chan [][]string, numJobs)
 	totalworker := 10
+	wg.Add(totalworker)
 	for w := 1; w <= totalworker; w++ {
-		go worker(w, jobs, results, dir)
+		go worker(w, jobs, results, dir, &wg)
+		time.Sleep(time.Second)
 	}
 	for _, job := range m {
 		jobs <- job
 	}
 	close(jobs)
+	wg.Wait()
 	for a := 1; a <= numJobs; a++ {
 		fmt.Println(<-results)
 	}
 	//wg.Wait()
 }
 
-func CreateFile(dir *string, filename string, a [][]string) {
-	filepath, err := filepath.Abs(*dir + filename)
+func CreateFile(dir *string, filename *string, a [][]string) {
+	filepath, err := filepath.Abs(*dir + *filename)
 	if err != nil {
 		log.Fatalln("Invalid path")
 	}
@@ -140,17 +144,19 @@ func CreateFile(dir *string, filename string, a [][]string) {
 		log.Fatal(err)
 	}
 }
-func worker(id int, jobs <-chan [][]string, results chan<- [][]string, dir *string) {
+func worker(id int, jobs <-chan [][]string, results chan<- [][]string, dir *string, wg *sync.WaitGroup) {
 	for j := range jobs {
-		//filename := j[0][3] + ".csv"
+		filename := j[0][4] + ".csv"
 		fmt.Printf("Worker %d starting a job\n", id)
 		time.Sleep(time.Second)
 		fmt.Printf("\nWorker %d finished a job\n", id)
 		results <- j
 		fmt.Printf("\nCreating file...\n")
-		//CreateFile(&dir, filename, <-jobs)
+		time.Sleep(time.Second)
+		CreateFile(dir, &filename, <-jobs)
 		fmt.Printf("\nFinished creating file on %s\n", *dir)
 	}
+	wg.Done()
 }
 
 /*func worker(id int, j chan Jobs) {
