@@ -11,7 +11,6 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
-	"sync"
 	"time"
 )
 
@@ -55,8 +54,6 @@ func main() {
 	//check := flag.String("grab", "", "Checking If user know what he do")
 	dir := flag.String("output", "", "Destination Output file")
 	flag.Parse()
-	flag.Lookup("grab")
-	var wg sync.WaitGroup
 	url := "https://data.gov.sg/api/action/datastore_search?resource_id=eb8b932c-503c-41e7-b513-114cffbe2338&limit=660"
 	spaceClient := http.Client{
 		Timeout: time.Second * 2, // Timeout after 2 seconds
@@ -110,17 +107,14 @@ func main() {
 	numJobs := len(m)
 	jobs := make(chan [][]string, numJobs)
 	results := make(chan [][]string, numJobs)
-	totalworker := 10
-	wg.Add(totalworker)
+	totalworker := 15
 	for w := 1; w <= totalworker; w++ {
-		go worker(w, jobs, results, dir, &wg)
-		time.Sleep(time.Second)
+		go worker(w, jobs, results, dir)
 	}
 	for _, job := range m {
 		jobs <- job
 	}
 	close(jobs)
-	wg.Wait()
 	for a := 1; a <= numJobs; a++ {
 		fmt.Println(<-results)
 	}
@@ -144,7 +138,7 @@ func CreateFile(dir *string, filename *string, a [][]string) {
 		log.Fatal(err)
 	}
 }
-func worker(id int, jobs <-chan [][]string, results chan<- [][]string, dir *string, wg *sync.WaitGroup) {
+func worker(id int, jobs <-chan [][]string, results chan<- [][]string, dir *string) {
 	for j := range jobs {
 		filename := j[0][4] + ".csv"
 		fmt.Printf("Worker %d starting a job\n", id)
@@ -153,10 +147,9 @@ func worker(id int, jobs <-chan [][]string, results chan<- [][]string, dir *stri
 		results <- j
 		fmt.Printf("\nCreating file...\n")
 		time.Sleep(time.Second)
-		CreateFile(dir, &filename, <-jobs)
+		CreateFile(dir, &filename, j)
 		fmt.Printf("\nFinished creating file on %s\n", *dir)
 	}
-	wg.Done()
 }
 
 /*func worker(id int, j chan Jobs) {
