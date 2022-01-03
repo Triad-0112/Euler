@@ -1,11 +1,5 @@
 package main
 
-import (
-	"bytes"
-	"fmt"
-	"sync"
-)
-
 /*
 func main() {
 	chanowner := func() <-chan int {
@@ -40,17 +34,50 @@ func main() {
 	the channel within the consume function to only reads.
 */
 func main() {
-	var wg sync.WaitGroup
-	printData := func(wg *sync.WaitGroup, data []byte) {
-		defer wg.Done()
-		var buff bytes.Buffer
-		for _, b := range data {
-			fmt.Fprintf(&buff, "%c", b)
+	/*
+		var wg sync.WaitGroup
+		printData := func(wg *sync.WaitGroup, data []byte) {
+			defer wg.Done()
+			var buff bytes.Buffer
+			for _, b := range data {
+				fmt.Fprintf(&buff, "%c", b)
+			}
+			fmt.Println(buff.String())
 		}
-		fmt.Println(buff.String())
-	}
-	wg.Add(2)
-	data := []byte("GolangGo")
-	go printData(&wg, data[:3])
-	go printData(&wg, data[3:])
+		wg.Add(2)
+		data := []byte("GolangGo")
+		go printData(&wg, data[:3])
+		go printData(&wg, data[3:])
+	*/
+	/*
+		var or func(channels ...<-chan interface{}) <-chan interface{}
+		or = func(channels ...<-chan interface{}) <-chan interface{} {
+			switch len(channels) {
+			case 0:
+				return nil
+			case 1:
+				return channels[0]
+			}
+			return or()
+		}
+		orDone := make(chan interface{})
+		go func() {
+			defer close(orDone)
+			switch len(channels) {
+			case 2:
+				select {
+				case <-channels[0]:
+				case <-channels[1]:
+				}
+			default:
+				select {
+				case <-channels[0]:
+				case <-channels[1]:
+				case <-channels[2]:
+				case <-or(append(channels[3:], orDone)...):
+				}
+			}
+		}()
+		return orDone
+	*/
 }

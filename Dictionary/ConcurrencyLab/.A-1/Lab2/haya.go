@@ -3,8 +3,6 @@ package main
 import (
 	"encoding/csv"
 	"encoding/json"
-	"flag"
-	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -24,6 +22,7 @@ type Worker struct {
 	ID   string
 	Dir  string
 	Jobs string
+	wLog *log.Logger
 }
 
 //Data TYPE DONT CHANGE
@@ -51,15 +50,10 @@ type Records struct {
 	Year   string `json:"year"`
 }
 
-func test(a string) *string {
-	fmt.Println(a)
-	return &a
-}
 func main() {
 	//check := flag.String("grab", "", "Checking If user know what he do")
-	dir := flag.String("output", "", "Destination Output file")
-	flag.Parse()
-	flag.Lookup("grab")
+	//dir := flag.String("output", "", "Destination Output file")
+	//flag.Parse()
 	var wg sync.WaitGroup
 	url := "https://data.gov.sg/api/action/datastore_search?resource_id=eb8b932c-503c-41e7-b513-114cffbe2338&limit=660"
 	spaceClient := http.Client{
@@ -84,39 +78,63 @@ func main() {
 		log.Fatal(readErr)
 	}
 
-	people1 := Graduate{}
-	jsonErr := json.Unmarshal(body, &people1)
+	datap := Graduate{}
+	jsonErr := json.Unmarshal(body, &datap)
 	if jsonErr != nil {
 		log.Fatal(jsonErr)
 	}
-	//ch := make(chan [][]string, 22)
+	ch := make(chan [][]string, 1000)
 	m := make(map[int][][]string)
 	//records := [][]string{}
-	for y := 1993; y <= 2014; y++ {
-		convert := strconv.Itoa(y)
+	wg.Add(1)
+	go func() {
+		for y := 1993; y <= 2014; y++ {
+			convert := strconv.Itoa(y)
 
-		for i := range people1.Result.Records {
-			//for i := 0; i < len(people1.Result.Records); i++ {
-			if people1.Result.Records[i].Year == convert {
-				temp := []string{
-					strconv.Itoa(people1.Result.Records[i].Ide),
-					people1.Result.Records[i].Sex,
-					people1.Result.Records[i].No,
-					people1.Result.Records[i].Course,
-					people1.Result.Records[i].Year,
+			for i := range datap.Result.Records {
+				//for i := 0; i < len(datap.Result.Records); i++ {
+				if datap.Result.Records[i].Year == convert {
+					temp := []string{
+						strconv.Itoa(datap.Result.Records[i].Ide),
+						datap.Result.Records[i].Sex,
+						datap.Result.Records[i].No,
+						datap.Result.Records[i].Course,
+						datap.Result.Records[i].Year,
+					}
+					m[y] = append(m[y], temp)
 				}
-				m[y] = append(m[y], temp)
-
 			}
+
+			//filename := convert + ".csv"
+			//wg.Add(1)
+			//go CreateFile(dir, filename, m[y], &wg)
 		}
-
-		filename := convert + ".csv"
-		wg.Add(1)
-		go CreateFile(dir, filename, m[y], &wg)
-	}
+		wg.Done()
+	}()
+	wg.Add(1)
+	go Workergrab(m, ch, &wg)
 	wg.Wait()
-}
+	//total_worker := 2
+	/*
+		for i := 1; i <= total_worker; i++ {
+			wg.Add(1)
+			myWorker := Worker{}
+			myWorker.ID = "ID= " + strconv.Itoa(i) + "\n"
+			myWorker.wLog = log.New(os.Stderr, myWorker.ID, 1)
+			go func(w *Worker) {
 
+			}(&myWorker)
+			wg.Done()
+		}
+		wg.Wait()
+	*/
+}
+func Workergrab(m map[int][][]string, ch chan [][]string, wg *sync.WaitGroup) {
+	for y := 1993; y <= 2014; y++ {
+		ch <- m[y]
+	}
+	wg.Done()
+}
 func CreateFile(dir *string, filename string, a [][]string, wg *sync.WaitGroup) {
 	defer wg.Done()
 	filepath, err := filepath.Abs(*dir + filename)
@@ -125,7 +143,6 @@ func CreateFile(dir *string, filename string, a [][]string, wg *sync.WaitGroup) 
 	}
 	f, err := os.Create(filepath)
 	if err != nil {
-
 		log.Fatalln("failed to open file", err)
 	}
 	//value := <-records
@@ -135,8 +152,3 @@ func CreateFile(dir *string, filename string, a [][]string, wg *sync.WaitGroup) 
 		log.Fatal(err)
 	}
 }
-
-/*func worker(id int, j chan Jobs) {
-	for jobs := range
-}
-*/
