@@ -96,11 +96,11 @@ func main() {
 		filename := convert + ".csv"
 		dir := "D:/Test/"
 		wg.Add(1)
-		go CreateFile(dir, filename, m[y], wg)
+		go CreateFile(dir, filename, m[y], &wg)
 	}
 	wg.Wait()
 }
-func CreateFile(dir, filename string, a [][]string, wg sync.WaitGroup) {
+func CreateFile(dir, filename string, a [][]string, wg *sync.WaitGroup) {
 	defer wg.Done()
 	filepath, err := filepath.Abs(dir + filename)
 	if err != nil {
