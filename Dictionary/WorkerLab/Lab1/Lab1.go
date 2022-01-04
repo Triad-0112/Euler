@@ -11,6 +11,7 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
+	"sync"
 	"time"
 )
 
@@ -51,13 +52,12 @@ type Records struct {
 }
 
 func main() {
-	//check := flag.String("grab", "", "Checking If user know what he do")
 	totalworker := flag.Int("concurrent_limit", 2, "Input total worker")
 	dir := flag.String("output", "", "Destination Output file")
 	flag.Parse()
 	url := "https://data.gov.sg/api/action/datastore_search?resource_id=eb8b932c-503c-41e7-b513-114cffbe2338&limit=660"
 	spaceClient := http.Client{
-		Timeout: time.Second * 2, // Timeout after 2 seconds
+		Timeout: time.Second * 10, // Timeout after 2 seconds
 	}
 	req, err := http.NewRequest(http.MethodGet, url, nil)
 	if err != nil {
@@ -82,9 +82,8 @@ func main() {
 	if jsonErr != nil {
 		log.Fatal(jsonErr)
 	}
-	//ch := make(chan [][]string, 22)
 	m := make(map[string][][]string)
-	//records := [][]string{}
+	var wg sync.WaitGroup
 	for y := 1993; y <= 2014; y++ {
 		convert := strconv.Itoa(y)
 		for i := range people1.Result.Records {
@@ -109,15 +108,17 @@ func main() {
 	jobs := make(chan [][]string, numJobs)
 	results := make(chan [][]string, numJobs)
 	for w := 1; w <= *totalworker; w++ {
-		go worker(w, jobs, results, dir)
+		wg.Add(1)
+		go worker(w, jobs, results, dir, &wg)
 	}
 	for _, job := range m {
 		jobs <- job
 	}
 	close(jobs)
-	for a := 1; a <= numJobs; a++ {
-		fmt.Println(<-results)
-	}
+	//for a := 1; a <= numJobs; a++ {
+	//fmt.Println(<-results)
+	//}
+	wg.Wait()
 	//wg.Wait()
 }
 
@@ -138,17 +139,16 @@ func CreateFile(dir *string, filename *string, a [][]string) {
 		log.Fatal(err)
 	}
 }
-func worker(id int, jobs <-chan [][]string, results chan<- [][]string, dir *string) {
+func worker(id int, jobs <-chan [][]string, results chan<- [][]string, dir *string, wg *sync.WaitGroup) {
+	defer wg.Done()
 	for j := range jobs {
 		filename := j[0][4] + ".csv"
-		fmt.Printf("Worker %d starting a job\n", id)
-		time.Sleep(time.Second)
-		fmt.Printf("\nWorker %d finished a job\n", id)
+		fmt.Printf("\nWorker %d starting a job\n", id)
 		results <- j
-		fmt.Printf("\nCreating file...\n")
-		time.Sleep(time.Second)
+		fmt.Printf("\nWorker %d Creating %s.csv\n", id, j[0][4])
 		CreateFile(dir, &filename, j)
-		fmt.Printf("\nFinished creating file on %s\n", *dir)
+		fmt.Printf("\nWorker %d Finished creating %s.csv on %s\n", id, j[0][4], *dir)
+		fmt.Printf("\nWorker %d finished a job\n", id)
 	}
 }
 
