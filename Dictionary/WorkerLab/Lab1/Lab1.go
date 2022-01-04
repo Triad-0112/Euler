@@ -18,15 +18,18 @@ import (
 )
 
 //TESTING WORKERPOOL
+/*
 type Jobs struct {
 	Filename string
 	Data     [][][]string
 }
+
 type Worker struct {
 	ID   string
 	Dir  string
 	Jobs string
 }
+*/
 
 //Data TYPE DONT CHANGE
 type Graduate struct {
