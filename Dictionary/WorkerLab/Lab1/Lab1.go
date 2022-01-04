@@ -13,6 +13,8 @@ import (
 	"strconv"
 	"sync"
 	"time"
+
+	"github.com/fatih/color"
 )
 
 //TESTING WORKERPOOL
@@ -50,6 +52,8 @@ type Records struct {
 	Course string `json:"type_of_course"`
 	Year   string `json:"year"`
 }
+
+var Red = "\033[31m"
 
 func main() {
 	totalworker := flag.Int("concurrent_limit", 2, "Input total worker")
@@ -115,11 +119,12 @@ func main() {
 		jobs <- job
 	}
 	close(jobs)
-	//for a := 1; a <= numJobs; a++ {
+	// Show each of jobs result
+	/*for a := 1; a <= numJobs; a++ {
 	//fmt.Println(<-results)
-	//}
+	}
+	*/
 	wg.Wait()
-	//wg.Wait()
 }
 
 func CreateFile(dir *string, filename *string, a [][]string) {
@@ -141,14 +146,18 @@ func CreateFile(dir *string, filename *string, a [][]string) {
 }
 func worker(id int, jobs <-chan [][]string, results chan<- [][]string, dir *string, wg *sync.WaitGroup) {
 	defer wg.Done()
+	textcolor := color.New(color.FgHiWhite, color.Bold).SprintfFunc()
+	workercolor := color.New(color.FgHiCyan, color.Bold).SprintfFunc()
+	directorycolor := color.New(color.FgHiYellow, color.Bold, color.Italic).SprintfFunc()
+	filenamecolor := color.New(color.FgHiGreen, color.BlinkRapid, color.Bold).SprintfFunc()
 	for j := range jobs {
 		filename := j[0][4] + ".csv"
-		fmt.Printf("\nWorker %d starting a job\n", id)
-		results <- j
-		fmt.Printf("\nWorker %d Creating %s.csv\n", id, j[0][4])
+		fmt.Printf("\n%s : %s\n", workercolor("[Worker %d]", id), textcolor("Starting a Job"))
+		//results <- j //to show The result of jobs, unnecessary
+		fmt.Printf("\n%s : %s %s\n", workercolor("[Worker %d]", id), textcolor("Creating"), filenamecolor("%s.csv", j[0][4]))
 		CreateFile(dir, &filename, j)
-		fmt.Printf("\nWorker %d Finished creating %s.csv on %s\n", id, j[0][4], *dir)
-		fmt.Printf("\nWorker %d finished a job\n", id)
+		fmt.Printf("\n%s : %s %s %s %s\n", workercolor("[Worker %d]", id), textcolor("Finished creating"), filenamecolor("%s.csv", j[0][4]), textcolor("At"), directorycolor("%s", *dir))
+		fmt.Printf("\n%s : %s\n", workercolor("[Worker %d]", id), textcolor("Finished a job"))
 	}
 }
 
