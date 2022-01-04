@@ -52,6 +52,7 @@ type Records struct {
 
 func main() {
 	//check := flag.String("grab", "", "Checking If user know what he do")
+	totalworker := flag.Int("concurrent_limit", 2, "Input total worker")
 	dir := flag.String("output", "", "Destination Output file")
 	flag.Parse()
 	url := "https://data.gov.sg/api/action/datastore_search?resource_id=eb8b932c-503c-41e7-b513-114cffbe2338&limit=660"
@@ -107,8 +108,7 @@ func main() {
 	numJobs := len(m)
 	jobs := make(chan [][]string, numJobs)
 	results := make(chan [][]string, numJobs)
-	totalworker := 15
-	for w := 1; w <= totalworker; w++ {
+	for w := 1; w <= *totalworker; w++ {
 		go worker(w, jobs, results, dir)
 	}
 	for _, job := range m {
