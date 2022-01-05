@@ -1,4 +1,5 @@
 #Patch V 1.0.0
+```
 Problem :
   - Design the Home Automation Remote Control.
   - The remote consists of 7 programmable slots (each can be assigned to a different household device) along with corresponding on/off buttons for each.
@@ -15,3 +16,4 @@ Solution Answer :
   - The remote doesn’t have any idea what the work is, it just has a command object that knows how to talk to the right object to get the work done. So, you see, the remote is decoupled from the light object!
   - This pattern is called Command Pattern
   - Wiki Definition: The Command Pattern encapsulates a request as an object, thereby letting you parameterise other objects with different requests, queue or log requests, and support undoable operations.
+```
