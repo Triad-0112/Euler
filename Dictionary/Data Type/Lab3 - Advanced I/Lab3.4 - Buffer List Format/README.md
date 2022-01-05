@@ -26,3 +26,113 @@ O_EXCL "If this is used with create, it fails if the file already exists (exclus
 O_SYNC "Executes a read/write operation and verifies its competition."
 O_TRUNC "If the file exists, its sizes is truncated to 0"
 ```
+
+
+## CREATE
+
+In order to create an Empty file, we can call a helper funtion called **Create**, which opens a new file with a 0666 permissions and truncates it if it doesnt exist. Alternatively, we can use **OpenFile** with the "O_CREATE|O_TRUNCATE" mode to specift custom permissions. 
+For example:
+
+```Go Language
+package main
+import "os"
+func main() {
+    f, err := os.Create("file.txt")
+    if err != nil {
+        fmt.Println("Error:",err)
+        return
+    }
+    f.Close()
+}
+``` 
+
+
+## TRUNCATE
+
+To truncate the content of a file under a certain dimension, and leave the file untouched if it's smaller, there is the **os.Truncate** method. Its usage is pretty simple. 
+For Example:
+
+```Go Language
+package main
+import (
+    "fmt"
+    "os"
+)
+func main() {
+    //Keep thing under 4kB
+    if err := os.Truncate("file.txt",4096); err != nil {
+        fmt.Println("Error:",err)
+    }
+}
+```
+
+
+## DELETE
+
+In order to delete a file, there is another simple function, called **os.Remove**.
+For Example:
+
+```Go Language
+package main
+import "os"
+func main() {
+    if err := os.Remove("file.txt"); err != nil {
+        fmt.Println("Error:",err)
+    }
+}
+```
+
+## MOVE
+
+The **os.Rename** function makes it possible to change a file name and/or its directory. Note that this operation replaces the destination file if it already exists.
+For Example:
+
+```Go Language
+package main
+import "os"
+func main() {
+    if err := os.Rename("file.txt", "../file.txt"); err != nil { //file, dir/filename.ext
+    fmt.Println("Error:", err)
+    }
+}
+```
+
+
+## COPY
+
+There's no unique function that makes it possible to copy a file, but this can easily be done with a reader and a writer with the **io.Copy** function.
+For Example:
+
+```GO Language
+func CopyFile(from, to string) (int64, error) {
+    src, err := os.Open(from)
+    if err != nil {
+        return 0, err
+    }
+    defer src.Close()
+    dst, err := os.OpenFile(to, os.O_WRONLY|os.O_CREATE, 0644)
+    if err != nil {
+        return 0, err
+    }
+    defer dst.Close()
+    return io.Copy(dst, src)
+}
+```
+
+
+## STATS
+
+The **os** package offers the *Fileinfo* interface, which returns the metadata of a file.
+The interface looks like:
+
+```GO Language
+type FileInfo interface {
+    Name() string // base name of the file
+    Size() int64 // length in bytes for regular files; system-dependent for others
+    Mode() FileMode // file mode bits
+    ModTime() time.Time // modification time
+    IsDir() bool // abbreviation for Mode().IsDir()
+    Sys() interface{} // underlying data source (can return nil)
+}
+```
+The **os.Stat** function returns information about the file with the specified path.
