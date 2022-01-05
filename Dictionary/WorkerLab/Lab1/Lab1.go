@@ -112,8 +112,8 @@ func main() {
 	numJobs := len(m)
 	jobs := make(chan [][]string, numJobs)
 	results := make(chan [][]string, numJobs)
+	wg.Add(*totalworker)
 	for w := 1; w <= *totalworker; w++ {
-		wg.Add(1)
 		go worker(w, jobs, results, dir, &wg)
 	}
 	for _, job := range m {

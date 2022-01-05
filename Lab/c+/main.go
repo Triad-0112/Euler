@@ -9,12 +9,11 @@ import (
 
 func start() {
 	dataLen := []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
-	go func() {
-		for _, i := range dataLen {
-
-			fmt.Println(i)
-		}
-	}()
+	for _, i := range dataLen {
+		go func(temp int) {
+			fmt.Println(temp)
+		}(i)
+	}
 }
 
 func main() {
