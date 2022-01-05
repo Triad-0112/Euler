@@ -152,3 +152,17 @@ In order to interact with the filesystem and change these properties, three func
 
 #### 1. vfs : github.com/blang/vfs
 #### 2. afero : github.com/spf13/afero
+
+
+## FILESYSTEM EVENTS 
+
+Go has some experimental features in the *golang.org/x/* package that are located under Go's GitHub handler (*https://github.com/golang/*). The *golang.org/x/sys* package is part of this list and includes a subpackage dedicated to Unix system events. This has been used to build a feature that is missing from Go's file functionality and can be really useful – observing a certain path for events on files like creation, deletion, and update. 
+
+The two Popular packages:
+```diff
+++notify: github.com/rjeczalik/notify
+++fsnotify: github.com/fsnotify/fsnotify
+```
+
+Both packages expose a function that allows the creation of watchers. Watchers are structures that contain channels that are in charge of delivering file events. They also expose another function that 's responsible for terminating/closing the watchers and underlying channels.
+
