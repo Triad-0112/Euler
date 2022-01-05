@@ -136,3 +136,19 @@ type FileInfo interface {
 }
 ```
 The **os.Stat** function returns information about the file with the specified path.
+
+
+## CHANGING PROPERTIES
+
+In order to interact with the filesystem and change these properties, three functions are available:
+```diff
++1. func Chmod(name string, mode FileMode) return error  // Changes the permissions of a file.
++2. func Chown(name string, uid, gid int) return error   // Changes the owner and group of a file
++3. func Chtimes(name string, atime time.Time, mtime time.Time) return error // Changes the access and modification time of a file
+```
+
+
+## VIRTUAL FILESYSTEM
+
+#### 1. vfs : github.com/blang/vfs
+#### 2. afero : github.com/spf13/afero
