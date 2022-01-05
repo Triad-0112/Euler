@@ -4,7 +4,7 @@ Notes :
 ```
 Exactly one of O_RDONLY, O_WRONLY, or O_RDWR must be specified.
 ```
-
+```CS
 1. O_RDONLY int = syscall.O_RDONLY // open the file read-only.
 2. O_WRONLY int = syscall.O_WRONLY // open the file write-only.
 3. O_RDWR int = syscall.O_RDWR // open the file read-write.
@@ -16,6 +16,7 @@ Exactly one of O_RDONLY, O_WRONLY, or O_RDWR must be specified.
 3. O_EXCL int = syscall.O_EXCL // used with O_CREATE, file must not exist.
 4. O_SYNC int = syscall.O_SYNC // open for synchronous I/O.
 5. O_TRUNC int = syscall.O_TRUNC // if possible, truncate file when opened.
+```
 
 Explanation :
 ```CS
