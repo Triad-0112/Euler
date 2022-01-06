@@ -126,9 +126,6 @@ func main() {
 	//numJobs := len(m)
 	//jobs := make(chan [][]string, 22)
 	results := make(chan [][]string, 22)
-	for _, job := range m {
-		ch <- job
-	}
 	wg.Add(*totalworker)
 	for w := 1; w <= *totalworker; w++ {
 		go worker(w, ch, results, dir, &wg)
@@ -145,12 +142,13 @@ func main() {
 
 func worker(id int, jobs <-chan [][]string, results chan<- [][]string, dir *string, wg *sync.WaitGroup) {
 	defer wg.Done()
+	data := <-jobs
 	fmt.Printf("\n%s : %s %s\n", workercolor("[Worker %d]", id), textcolor("Starting to work at"), timecolor("%s", now.Format("15:04:05.999999999Z07:00")))
 	for j := range jobs {
 		filename := j[0][4] + ".csv"
 		//results <- j //to show The result of jobs, unnecessary
 		fmt.Printf("\n%s : %s %s %s\n", workercolor("[Worker %d]", id), textcolor("Creating"), filenamecolor("%s.csv", j[0][4]), timecolor("%s", now.Format("15:04:05.999999999Z07:00")))
-		CreateFile(dir, &filename, j)
+		CreateFile(dir, &filename, data)
 		fmt.Printf("\n%s : %s %s %s %s %s\n", workercolor("[Worker %d]", id), textcolor("Finished creating"), filenamecolor("%s.csv", j[0][4]), textcolor("At"), directorycolor("%s", *dir), timecolor("%s", now.Format("15:04:05.999999999Z07:00")))
 	}
 	fmt.Printf("\n%s : %s %s\n", workercolor("[Worker %d]", id), textcolor("Finished work at"), timecolor("%s", now.Format("15:04:05.999999999Z07:00")))
