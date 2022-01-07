@@ -53,6 +53,8 @@ var notificationcolor = color.New(color.FgHiRed, color.Bold).SprintfFunc()
 var now = time.Now()
 
 //WORKER POOL TEST
+type WorkTool interface {
+}
 type Pool struct {
 	Jobs       []*Jobs
 	TWorker    int
@@ -92,8 +94,8 @@ func (p *Pool) Work(id int) {
 }
 func (j *Jobs) Run(wg *sync.WaitGroup, id int) {
 	defer wg.Done()
-	defer fmt.Printf("%s %s\n\n", workercolor("[Worker %d] :", id+1), textcolor("Finished working on data-%s.csv", filenamecolor("%d", j.year)))
-	fmt.Printf("%s %s\n\n", workercolor("[Worker %d] :", id+1), textcolor("Starting to work on data-%s.csv", filenamecolor("%d", j.year)))
+	defer fmt.Printf("%s %s\n\n", workercolor("[Worker %d] :", id+1), textcolor("Finished working on data-%s", filenamecolor("%d.csv", j.year)))
+	fmt.Printf("%s %s\n\n", workercolor("[Worker %d] :", id+1), textcolor("Starting to work on data-%s", filenamecolor("%d.csv", j.year)))
 	CreateFile(&j.dir, strconv.Itoa(j.year)+".csv", fetcher(j.year, id), id)
 }
 func NewJobs(year int, dir string) *Jobs {
@@ -111,9 +113,7 @@ func fetcher(year int, id int) [][]string {
 		}
 	}()
 	defer fmt.Printf("%s %s %s\n\n", workercolor("[Worker %d] :", id+1), textcolor("Finished collecting data of %s", filenamecolor("%d", year)), textcolor("from API"))
-	//("%d from API\n\n", id+1, year)
-	//fmt.Printf(" Starting to fetch data of %d\n\n", year)
-	fmt.Printf("%s %s", workercolor("[Worker %d] :", id+1), textcolor("Starting to fetch data of %s\n\n", filenamecolor("%d", year)))
+	fmt.Printf("%s %s", workercolor("[Worker %d] :", id+1), textcolor("Starting to fetch data of %s\n\n", filenamecolor("%d.csv", year)))
 	url := baseurl + strconv.Itoa(year)
 	m := make(map[string][][]string)
 	spaceClient := http.Client{
@@ -152,8 +152,8 @@ func fetcher(year int, id int) [][]string {
 	return m[convert]
 }
 func CreateFile(dir *string, filename string, a [][]string, id int) {
-	defer fmt.Printf("%s %s", workercolor("[Worker %d]:", id+1), textcolor("Finished Creating %s at %s\n\n", filenamecolor("%s", filename), directorycolor("%s", *dir)))
-	fmt.Printf("%s %s", workercolor("[Worker %d]:", id+1), textcolor("Creating %s at %s\n\n", filenamecolor("%s", filename), directorycolor("%s", *dir)))
+	defer fmt.Printf("%s %s", workercolor("[Worker %d]:", id+1), textcolor("Finished Creating %s %s %s\n\n", filenamecolor("%s", filename), textcolor("at"), directorycolor("%s", *dir)))
+	fmt.Printf("%s %s", workercolor("[Worker %d]:", id+1), textcolor("Creating %s %s %s\n\n", filenamecolor("%s", filename), textcolor("at"), directorycolor("%s", *dir)))
 	filepath, err := filepath.Abs(*dir + filename)
 	if err != nil {
 		log.Fatalln("Invalid path")
