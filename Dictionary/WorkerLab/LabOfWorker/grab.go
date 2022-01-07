@@ -66,6 +66,7 @@ type Jobs struct {
 	dir  string
 }
 
+// FACTORY PATTERN
 func NewPool(jobs []*Jobs, tworker int) *Pool {
 	return &Pool{
 		Jobs:       jobs,
