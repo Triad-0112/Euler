@@ -7,12 +7,15 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
-	"net/http"
 	"os"
 	"path/filepath"
 	"strconv"
 	"sync"
 	"time"
+
+	//"flag"
+
+	"net/http"
 
 	"github.com/fatih/color"
 )
@@ -56,6 +59,8 @@ type Records struct {
 	Year   string `json:"year"`
 }
 
+const baseurl = "https://data.gov.sg/api/action/datastore_search?resource_id=eb8b932c-503c-41e7-b513-114cffbe2338&q="
+
 var textcolor = color.New(color.FgHiWhite, color.Bold).SprintfFunc()
 var mainworkercolor = color.New(color.FgHiRed, color.Bold).SprintFunc()
 var workercolor = color.New(color.FgHiCyan, color.Bold).SprintfFunc()
@@ -65,90 +70,72 @@ var timecolor = color.New(color.FgHiMagenta, color.Bold).SprintfFunc()
 var now = time.Now()
 
 func main() {
-	start := time.Now()
 	totalworker := flag.Int("concurrent_limit", 2, "Input total worker")
 	dir := flag.String("output", "D:/Default/", "Destination Output file")
 	flag.Parse()
-	url := "https://data.gov.sg/api/action/datastore_search?resource_id=eb8b932c-503c-41e7-b513-114cffbe2338&limit=660"
-	spaceClient := http.Client{
-		Timeout: time.Second * 10, // Timeout after 2 seconds
-	}
-	req, err := http.NewRequest(http.MethodGet, url, nil)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	res, getErr := spaceClient.Do(req)
-	if getErr != nil {
-		log.Fatal(getErr)
-	}
-
-	if res.Body != nil {
-		defer res.Body.Close()
-	}
-
-	body, readErr := ioutil.ReadAll(res.Body)
-	if readErr != nil {
-		log.Fatal(readErr)
-	}
-	people1 := Graduate{}
-	jsonErr := json.Unmarshal(body, &people1)
-	if jsonErr != nil {
-		log.Fatal(jsonErr)
-	}
-	m := make(map[string][][]string)
-	ch := make(chan [][]string, 22)
+	//datamap := make(map[string][][]string)
 	var wg sync.WaitGroup
-	var mt sync.RWMutex
-	fmt.Println(time.Since(start))
-
-	for y := 1993; y <= 2014; y++ {
-		convert := strconv.Itoa(y)
-		fmt.Printf("\n%s : %s %s\n", mainworkercolor("[Main Worker]"), textcolor("Starting to process data-%s at", convert), timecolor("%s", now.Format("15:04:05.999999999Z07:00")))
-		for i := range people1.Result.Records {
-			//for i := 0; i < len(people1.Result.Records); i++ {
-			if people1.Result.Records[i].Year == convert {
-				temp := []string{
-					strconv.Itoa(people1.Result.Records[i].Ide),
-					people1.Result.Records[i].Sex,
-					people1.Result.Records[i].No,
-					people1.Result.Records[i].Course,
-					people1.Result.Records[i].Year,
-				}
-				m[convert] = append(m[convert], temp)
-			}
-		}
-		fmt.Printf("\n%s : %s%s %s\n", mainworkercolor("[Main Worker]"), textcolor("Send-"), filenamecolor("%s to Work List at", convert), timecolor("%s", now.Format("15:04:05.999999999Z07:00")))
-		ch <- m[convert]
-		//filename := convert + ".csv"
-		//wg.Add(1)
-		//go CreateFile(dir, filename, m[convert], &wg)
-	}
-	//numJobs := len(m)
-	//jobs := make(chan [][]string, 22)
-	results := make(chan [][]string, 22)
+	ch := make(chan [][]string, 22)
+	m := make(map[string][][]string)
 	wg.Add(*totalworker)
-	for w := 1; w <= *totalworker; w++ {
-		go worker(w, ch, results, dir, &wg, &mt)
-	}
+	go workerfetch(m, ch, &wg, 1, 1993, 2014) // fetch Function Concurreny
 	wg.Wait()
-	close(ch)
-	// Show each of jobs result
-	/*for a := 1; a <= numJobs; a++ {
-	//fmt.Println(<-results)
+	for w := 2; w <= *totalworker; w++ {
+		go worker(w, ch, dir, &wg)
 	}
-	*/
-	fmt.Println(time.Since(start))
+	close(ch)
 }
 
-func worker(id int, jobs <-chan [][]string, results chan<- [][]string, dir *string, wg *sync.WaitGroup, mt *sync.RWMutex) {
+func workerfetch(m map[string][][]string, ch chan [][]string, wg *sync.WaitGroup, id, yearinit, yearend int) {
 	defer wg.Done()
+	for i := yearinit; i <= yearend; i++ {
+		url := baseurl + strconv.Itoa(i)
+		spaceClient := http.Client{
+			Timeout: time.Second * 10,
+		}
+		req, err := http.NewRequest(http.MethodGet, url, nil)
+		if err != nil {
+			log.Fatal(err)
+		}
+		res, getErr := spaceClient.Do(req)
+		if getErr != nil {
+			log.Fatal(getErr)
+		}
+		if res.Body != nil {
+			defer res.Body.Close()
+		}
+		body, readErr := ioutil.ReadAll(res.Body)
+		if readErr != nil {
+			log.Fatal(readErr)
+		}
+		record := Graduate{}
+		jsonErr := json.Unmarshal(body, &record)
+		if jsonErr != nil {
+			log.Fatal(jsonErr)
+		}
+		convert := strconv.Itoa(i)
+		for i := range record.Result.Records {
+			temp := []string{
+				strconv.Itoa(record.Result.Records[i].Ide),
+				record.Result.Records[i].Sex,
+				record.Result.Records[i].Course,
+				record.Result.Records[i].Year,
+			}
+			m[convert] = append(m[convert], temp)
+		}
+		ch <- m[convert]
+	}
+}
+
+func worker(id int, jobs <-chan [][]string, dir *string, wg *sync.WaitGroup) {
+	defer wg.Done()
+	now := time.Now()
 	fmt.Printf("\n%s : %s %s\n", workercolor("[Worker %d]", id), textcolor("Starting to work at"), timecolor("%s", now.Format("15:04:05.999999999Z07:00")))
 	for j := range jobs {
 		filename := j[0][4] + ".csv"
 		//results <- j //to show The result of jobs, unnecessary
 		fmt.Printf("\n%s : %s %s %s\n", workercolor("[Worker %d]", id), textcolor("Creating"), filenamecolor("%s.csv", j[0][4]), timecolor("%s", now.Format("15:04:05.999999999Z07:00")))
-		CreateFile(dir, &filename, <-jobs)
+		CreateFile(dir, &filename, j)
 		fmt.Printf("\n%s : %s %s %s %s %s\n", workercolor("[Worker %d]", id), textcolor("Finished creating"), filenamecolor("%s.csv", j[0][4]), textcolor("At"), directorycolor("%s", *dir), timecolor("%s", now.Format("15:04:05.999999999Z07:00")))
 	}
 	fmt.Printf("\n%s : %s %s\n", workercolor("[Worker %d]", id), textcolor("Finished work at"), timecolor("%s", now.Format("15:04:05.999999999Z07:00")))
@@ -170,9 +157,3 @@ func CreateFile(dir *string, filename *string, a [][]string) {
 		log.Fatal(err)
 	}
 }
-
-/*
-func worker(id int, j chan Jobs) {
-	for jobs := range
-}
-*/

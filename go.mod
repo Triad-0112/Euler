@@ -28,6 +28,7 @@ require (
 	github.com/saracen/walker v0.1.2
 	github.com/segmentio/go-log v1.9.0
 	github.com/tj/docopt v1.0.0
+	github.com/vardius/worker-pool/v2 v2.1.0
 	go.uber.org/zap v1.19.1
 	golang.org/x/net v0.0.0-20211216030914-fe4d6282115f
 	golang.org/x/sys v0.0.0-20211216021012-1d35b9e2eb4e // indirect
